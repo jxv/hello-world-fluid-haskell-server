@@ -1,0 +1,75 @@
+# This YAML file describes your package. Stack will automatically generate a
+# Cabal file when you run `stack build`. See the hpack website for help with
+# this file: <https://github.com/sol/hpack>.
+name: hello-world
+version: '0.0.0'
+github: "githubuser/hello-world"
+license: MIT
+author: "Author name here"
+maintainer: "Author name here"
+# synopsis: A new Haskeleton package.
+# description: hello-world is a new Haskeleton package.
+# category: Other
+
+extra-source-files:
+- CHANGELOG.md
+- LICENSE.md
+- package.yaml
+- README.md
+- stack.yaml
+
+ghc-options: -Wall
+
+library:
+  dependencies:
+  - base
+  - fluid-idl
+  - fluid-idl-scotty
+  - mtl
+  - scotty
+  - text
+  source-dirs: library
+  default-extensions:
+    - NamedFieldPuns
+    - MultiParamTypeClasses
+    - GeneralizedNewtypeDeriving
+    - OverloadedStrings
+
+executables:
+  hello-world:
+    source-dirs: executable
+    main: Main.hs
+    dependencies:
+    - base
+    - hello-world
+    ghc-options:
+    - -rtsopts
+    - -threaded
+    - -with-rtsopts=-N
+
+benchmarks:
+  hello-world-benchmarks:
+    source-dirs: benchmark
+    main: Main.hs
+    dependencies:
+    - base
+    - hello-world
+    - criterion
+    ghc-options:
+    - -rtsopts
+    - -threaded
+    - -with-rtsopts=-N
+
+tests:
+  hello-world-test-suite:
+    source-dirs: test-suite
+    main: Main.hs
+    dependencies:
+    - base
+    - hello-world
+    - tasty
+    - tasty-hspec
+    ghc-options:
+    - -rtsopts
+    - -threaded
+    - -with-rtsopts=-N
