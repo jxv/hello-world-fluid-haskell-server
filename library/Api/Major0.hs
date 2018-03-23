@@ -20,6 +20,7 @@ module Api.Major0
   , HelloWorld'Thrower(..)
   , HelloWorld'Service(..)
   , Hello(..)
+  , Goodbye(..)
   , helloWorld'Scotty'Post
   , helloWorld'Scotty'Get
   ) where
@@ -40,7 +41,7 @@ import qualified Fluid.Server.Scotty as Scotty
 
 -- Version
 helloWorld'version :: C.Version
-helloWorld'version = C.Version 0 0
+helloWorld'version = C.Version 0 1
 
 helloWorld'pull :: C.Pull
 helloWorld'pull = C.Pull "http" "localhost" "/" 8080
@@ -57,9 +58,11 @@ class C.ServiceThrower m => HelloWorld'Thrower m where
 -- Service
 class P.Monad m => HelloWorld'Service meta m where
   helloWorld'Hello :: meta -> Hello -> m R.Text
+  helloWorld'Goodbye :: meta -> Goodbye -> m R.Text
 
 instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Response m) where
   helloWorld'Hello _meta = M.lift P.. helloWorld'Hello _meta
+  helloWorld'Goodbye _meta = M.lift P.. helloWorld'Goodbye _meta
 
 --------------------------------------------------------
 -- Types
@@ -68,6 +71,11 @@ instance HelloWorld'Service meta m => HelloWorld'Service meta (M.ExceptT C.Respo
 -- Struct: Hello
 data Hello = Hello
   { helloWho :: R.Text
+  } deriving (P.Show, P.Eq)
+
+-- Struct: Goodbye
+data Goodbye = Goodbye
+  { goodbyeWho :: R.Text
   } deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
@@ -127,6 +135,7 @@ helloWorld'ApiCall meta' apiCall' = case C.parseApiCall helloWorld'ApiParser api
   P.Nothing -> C.runtimeThrow (C.RuntimeError'UnrecognizedCall P.$ C.apiCallName apiCall')
   P.Just x' -> case x' of
     HelloWorld'Api'Hello a' -> C.toVal P.<$> helloWorld'Hello meta' a'
+    HelloWorld'Api'Goodbye a' -> C.toVal P.<$> helloWorld'Goodbye meta' a'
 
 -- API Parser
 helloWorld'ApiParser :: C.ApiParser HelloWorld'Api
@@ -134,6 +143,7 @@ helloWorld'ApiParser = C.ApiParser
   { C.hollow = R.empty
   , C.struct = R.fromList
      [ ("Hello", v HelloWorld'Api'Hello)
+     , ("Goodbye", v HelloWorld'Api'Goodbye)
      ]
   , C.enumeration = R.empty
   , C.wrap = R.empty
@@ -144,6 +154,7 @@ helloWorld'ApiParser = C.ApiParser
 -- Api
 data HelloWorld'Api
   = HelloWorld'Api'Hello Hello
+  | HelloWorld'Api'Goodbye Goodbye
   deriving (P.Show, P.Eq)
 
 --------------------------------------------------------
@@ -173,10 +184,33 @@ instance R.FromJSON Hello where
       P.Nothing -> P.mzero
       P.Just _y -> P.return _y
 
+instance C.ToVal Goodbye where
+  toVal Goodbye
+    { goodbyeWho
+    } = C.Val'ApiVal P.$ C.ApiVal'Struct P.$ C.Struct P.$ R.fromList
+    [ ("who", C.toVal goodbyeWho)
+    ]
+
+instance C.FromVal Goodbye where
+  fromVal = \case
+    C.Val'ApiVal (C.ApiVal'Struct (C.Struct _m)) -> Goodbye
+      P.<$> C.getMember _m "who"
+    _ -> P.Nothing
+
+instance R.ToJSON Goodbye where
+  toJSON = R.toJSON P.. C.toVal
+
+instance R.FromJSON Goodbye where
+  parseJSON _v = do
+    _x <- R.parseJSON _v
+    case C.fromVal _x of
+      P.Nothing -> P.mzero
+      P.Just _y -> P.return _y
+
 --------------------------------------------------------
 -- Spec
 --------------------------------------------------------
 
 helloWorld'spec :: R.Value
 helloWorld'spec = v
-  where P.Just v = R.decode "{\"fluid\":{\"major\":0,\"minor\":0},\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"host\":\"localhost\",\"path\":\"/\",\"port\":8080,\"meta\":\"Unit\",\"error\":\"Unit\"},\"schema\":{\"Hello\":{\"m\":[{\"who\":\"String\"}],\"o\":\"String\"}},\"version\":{\"major\":0,\"minor\":0}}"
+  where P.Just v = R.decode "{\"fluid\":{\"major\":0,\"minor\":0},\"pull\":{\"protocol\":\"http\",\"name\":\"HelloWorld\",\"host\":\"localhost\",\"path\":\"/\",\"port\":8080,\"meta\":\"Unit\",\"error\":\"Unit\"},\"schema\":{\"Hello\":{\"m\":[{\"who\":\"String\"}],\"o\":\"String\"},\"Goodbye\":{\"m\":[{\"who\":\"String\"}],\"o\":\"String\"}},\"version\":{\"major\":0,\"minor\":1}}"

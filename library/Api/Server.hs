@@ -18,6 +18,7 @@ module Api.Server
   , helloWorld'Scotty'Post
   , helloWorld'Scotty'Get
   , V0.Hello(..)
+  , V0.Goodbye(..)
   , V0.HelloWorld'Service(..)
   , V0.HelloWorld'Thrower(..)
   , V0.helloWorld'pull
@@ -35,6 +36,7 @@ import qualified Api.Major0 as V0
   , helloWorld'pull
   , helloWorld'spec
   , Hello(..)
+  , Goodbye(..)
   )
 
 helloWorld'handlerMap
@@ -47,7 +49,7 @@ helloWorld'handlerMap
   -> xtra
   -> R.Map C.Major (C.Minor, C.Request -> m (P.Either C.Response C.Response))
 helloWorld'handlerMap hooks0 xtra = R.fromList
-    [ (0, (0, V0.helloWorld'handler hooks0 xtra))
+    [ (0, (1, V0.helloWorld'handler hooks0 xtra))
     ]
 
 helloWorld'spec :: R.Value
