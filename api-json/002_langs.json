@@ -1,0 +1,41 @@
+{
+  "fluid": {
+    "major": 0,
+    "minor": 0
+  },
+  "pull": {
+    "protocol": "http",
+    "name": "HelloWorld",
+    "host": "localhost",
+    "path": "/",
+    "port": 8080,
+    "meta": "Unit",
+    "error": "Unit"
+  },
+  "schema": {
+    "Lang": [
+      "English",
+      "Spanish",
+      "French"
+    ],
+    "Hello": {
+      "m": [
+        {
+          "lang": "Lang"
+        },
+        {
+          "who": "String"
+        }
+      ],
+      "o": "String"
+    },
+    "Goodbye": {
+      "m": [
+        {
+          "who": "String"
+        }
+      ],
+      "o": "String"
+    }
+  }
+}
